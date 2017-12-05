@@ -19,7 +19,8 @@ Let's consider one arm of the robot. Since it is attached to the end effector on
 
 So basically, all we have to do is draw a sphere around the point we want to go to, draw a cricle around the motor shaft of our joint, and find where they intersect. After we know the intersection point, we can use some simple trig to find the joint angle. EZ.
 
-Now time for math. 
+Now time for math. Let's say our end effector is at an arbitrary point **(x,y,z)**. We'll do the computations for a single arm first. Let's say the motor shaft is at point **(x0,y0,z0)**, the upper segment is length **rf**, the lower segment is length **re**, and the end effector is a equilateral triangle of side length **e**.
+
 
 
 
