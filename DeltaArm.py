@@ -10,7 +10,7 @@ class DeltaArm:
         self.angles = [-1, -1, -1]
         self.zero_vals = [370, 335, 325]
         self.ninety_vals = [640, 585 ,595]
-        self.phi_vals = [0, 2*math.pi/3, 4*math.pi/3]
+        self.phi_vals = [math.radians(240+45), math.radians(45), math.radians(120+45)]
         #inches
         self.fixed_edge = 4.0
         self.effector_edge = 1.5
