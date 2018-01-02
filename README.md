@@ -43,6 +43,69 @@ and
 
 2 equations, 2 unkowns. Now just solve for **x** and **y**!
 
+Here's the code that performs these operations:
+
+```
+    def rotate_point_to_yz_plane(self,x0,y0,z0,phi):
+        #do rotation matrix
+        x = x0*math.cos(phi) + y0*math.sin(phi)
+        y = -x0*math.sin(phi) + y0*math.cos(phi)
+
+        #z is the same
+        z = z0
+        return (x,y,z)
 
 
+    def inverse_kinematics_in_yz_plane(self,x0,y0,z0):
+        # parameters
+        rf = self.upper_len
+        re = self.lower_len
+        f = self.fixed_edge
+        e = self.effector_edge
 
+        #linear coefficients of EQN z = b*y + a
+
+        a = (x0**2 + (y0-e/(2*math.sqrt(3)))**2 + z0**2 + rf**2 - re**2 - f**2/12)/(2*z0) 
+        b = (-f/(2*math.sqrt(3)) - y0 + e/(2*math.sqrt(3)))/z0
+
+        #plug line (z = b*y + a) into circle in yz w/ center (-f/2sqrt(3),0)
+
+        disc = (f/math.sqrt(3) + 2*a*b) - 4*(b**2+1)*(f**2/12 + a**2 - rf**2)
+        if disc < 0:
+            #disciminate < 0 -> no solution
+            return -1
+
+        #compute solution w/ lower y value
+        y = (-(f/math.sqrt(3) + 2*a*b) - math.sqrt(disc))/(2*(b**2+1))
+        z = b*y + a
+
+        theta = DeltaArm.wrap_angle_rad(math.atan(z/(y + f/(2*math.sqrt(3)))))
+        return math.degrees(theta)
+        
+    def compute_triple_inverse_kinematics(self, x, y, z):
+        thetas = []
+        for phi in self.phi_vals:
+            (x0,y0,z0) = self.rotate_point_to_yz_plane(x,y,z,phi)
+            theta = self.inverse_kinematics_in_yz_plane(x0,y0,z0)
+            if theta == -1:
+                raise ValueError('that point is impossible!')
+            thetas.append(theta)
+        return (thetas[0], thetas[1], thetas[2])
+
+    def move_to_point(self,x,y,z):
+        (a1,a2,a3) = self.compute_triple_inverse_kinematics(x,y,z)
+        self.set_all_to_different_angle(a1,a2,a3)
+```
+
+For example, if you want to move the arm to the point `(0,0,-8)`, then use the following code:
+
+```
+import DeltaArm
+da = DeltaArm.DeltaArm(0,1,2)#ports on servo hat
+da.move_to_point(0,0,-8)
+```
+And that's all there is to it!
+
+For another helpful tutorial see: http://forums.trossenrobotics.com/tutorials/introduction-129/delta-robot-kinematics-3276/
+
+Good luck!
