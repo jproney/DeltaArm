@@ -29,7 +29,7 @@ The equation of our upper circle in the **yz** plane is **(y + f/(2sqrt(3)))^2 +
 
 **y = -x0\*sin(theta) + y0\*cos(theta)**
 
-These **(x,y)** values become our new **x0 and y0**, and **z0** stays the same, since it's oe the axis of rotation. Since we know that our lower circle lies in the **yz** plane, its center must be at the point **(y0,z0)** using our new rotated vales. Great! Now all we need to fully define the lower circle is it's radius.
+These **(x,y)** values become our new **x0 and y0**, and **z0** stays the same, since it's on the axis of rotation. Since we know that our lower circle lies in the **yz** plane, its center must be at the point **(y0,z0)** using our new rotated vales. Great! Now all we need to fully define the lower circle is it's radius.
 
 The lower joint is offset from the **yz** plane by a distance of **x0**, which follows naturally from our definition of the **yz** plane. With a little bit of geometric imagination, we can draw a right triangle with a hyportenuse of **rf** and leg lengths of **x0** and the radius of the lower circle. Thus, we can calculate the radius of this cricle as **sqrt(rf^2 - x0^2)**.
 
