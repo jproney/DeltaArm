@@ -11,12 +11,13 @@ class DeltaArm:
         self.zero_vals = [-2000, -2000, -2000]
         self.ninety_vals = [64000, 64000 ,64000]
         #angles of each effector arm relative to coordinate axis
-        self.phi_vals = [math.radians(240+45), math.radians(45), math.radians(120+45)]
-        #inches
-        self.fixed_edge = 4.0
-        self.effector_edge = 1.5
-        self.upper_len = 5.0
-        self.lower_len = 7.0
+        self.phi_vals = [math.radians(210), math.radians(90), math.radians(330)]
+        #feet
+        self.fixed_edge = .8828
+        self.effector_edge = .28867
+        self.upper_len = 1.438
+        self.lower_len = 2.90188
+        self.end_effector_z_offset = .083
 
     def home_all(self):
         for m in self.motors:
@@ -49,11 +50,13 @@ class DeltaArm:
     def set_all_to_same_angle(self,ang):
         for i in range(3):
             self.set_single_angle(i,ang)
+            time/sleep(.1)
 
     def set_all_to_different_angle(self,a1,a2,a3):
         angs = [a1,a2,a3]
         for i in range(3):
             self.set_single_angle(i,angs[i]) 
+            time.sleep(.1)
 
     def stop_all(self):
         self.motors[0].hardStop()
@@ -104,6 +107,7 @@ class DeltaArm:
         re = self.lower_len
         f = self.fixed_edge
         e = self.effector_edge
+        z0 = z0 + self.end_effector_z_offset
 
         #linear coefficients of EQN z = b*y + a
 
@@ -137,7 +141,7 @@ class DeltaArm:
     def move_to_point(self,x,y,z):
         (a1,a2,a3) = self.compute_triple_inverse_kinematics(x,y,z)
         self.set_all_to_different_angle(a1,a2,a3)
-
+        
 
 
 
