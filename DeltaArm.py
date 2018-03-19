@@ -1,15 +1,15 @@
-import PCA9685
+import Slush
 import math
+import time
 
 class DeltaArm:
     def __init__(self, c1, c2, c3):
-        self.pwm = PCA9685.PCA9685()
-        self.pwm.set_pwm_freq(60)
-        self.channels = [c1,c2,c3]
+        self.board = Slush.sBoard()
+        self.motors = [Slush.Motor(c1),Slush.Motor(c2),Slush.Motor(c3)]
         self.positions = [-1,-1,-1]
         self.angles = [-1, -1, -1]
-        self.zero_vals = [370, 335, 325]
-        self.ninety_vals = [640, 585 ,595]
+        self.zero_vals = [-2000, -2000, -2000]
+        self.ninety_vals = [64000, 64000 ,64000]
         #angles of each effector arm relative to coordinate axis
         self.phi_vals = [math.radians(240+45), math.radians(45), math.radians(120+45)]
         #inches
@@ -18,23 +18,31 @@ class DeltaArm:
         self.upper_len = 5.0
         self.lower_len = 7.0
 
-    def set_single_pwm(self,num,val):
-        self.pwm.set_pwm(self.channels[num],0,val)
-        self.positions[num] = val
-        self.angles[num] = self.position_to_angle(num, val)
+    def home_all(self):
+        for m in self.motors:
+            while m.isBusy():
+                continue
+            m.goUntilPress(0,0,5000)
+            time.sleep(.1)
+         
 
-    def set_all_to_same_pwm(self,val):
-        for i in range(3):
-            self.set_single_pwm(i,val)
 
-    def set_all_to_different_pwm(self,v1,v2,v3):
-        vals = [v1,v2,v3]
+    def set_single_position_steps(self,num,pos):
+        self.positions[num] = pos
+        self.angles[num] = self.position_to_angle(num, pos)
+        while self.motors[num].isBusy():
+            continue
+        self.motors[num].goTo(pos)
+
+    def set_all_to_same_position(self,val): 
         for i in range(3):
-            self.set_single_pwm(vals[i])
+            self.set_single_position_steps(i,val)
+            time.sleep(.1)
+
 
     def set_single_angle(self,num,ang):
         val = int(self.angle_to_position(num, ang))
-        self.pwm.set_pwm(self.channels[num],0,val)
+        self.set_single_position_steps(num,val)
         self.positions[num] = val
         self.angles[num] = ang
     
@@ -45,10 +53,21 @@ class DeltaArm:
     def set_all_to_different_angle(self,a1,a2,a3):
         angs = [a1,a2,a3]
         for i in range(3):
-            self.set_single_angle(i,angs[i])   
-            
+            self.set_single_angle(i,angs[i]) 
+
+    def stop_all(self):
+        self.motors[0].hardStop()
+        self.motors[1].hardStop()
+        self.motors[2].hardStop()
+
+    
+    def reset_pos_all(self):
+        self.motors[0].setAsHome()
+        self.motors[1].setAsHome()
+        self.motors[2].setAsHome()
+
     def get_position(self,num):
-        self.angles[num] = self.position_to_angle(val)    
+        self.angles[num] = self.position_to_angle(self.positions[num])    
         return self.positions[num]
 
     def get_angle(self, num):
