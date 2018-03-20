@@ -6,6 +6,10 @@ class DeltaArm:
     def __init__(self, c1, c2, c3):
         self.board = Slush.sBoard()
         self.motors = [Slush.Motor(c1),Slush.Motor(c2),Slush.Motor(c3)]
+        for m in self.motors:
+            m.setCurrent(20,100,100,100)
+            m.setAccel(750)
+            m.setMaxSpeed(750)
         self.positions = [-1,-1,-1]
         self.angles = [-1, -1, -1]
         self.zero_vals = [-2000, -2000, -2000]
@@ -24,7 +28,6 @@ class DeltaArm:
             while m.isBusy():
                 continue
             m.goUntilPress(0,0,5000)
-            time.sleep(.1)
          
 
 
@@ -34,6 +37,7 @@ class DeltaArm:
         while self.motors[num].isBusy():
             continue
         self.motors[num].goTo(pos)
+        print(pos)
 
     def set_all_to_same_position(self,val): 
         for i in range(3):
@@ -50,13 +54,11 @@ class DeltaArm:
     def set_all_to_same_angle(self,ang):
         for i in range(3):
             self.set_single_angle(i,ang)
-            time/sleep(.1)
 
     def set_all_to_different_angle(self,a1,a2,a3):
         angs = [a1,a2,a3]
         for i in range(3):
             self.set_single_angle(i,angs[i]) 
-            time.sleep(.1)
 
     def stop_all(self):
         self.motors[0].hardStop()
