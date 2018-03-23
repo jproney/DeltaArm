@@ -10,6 +10,7 @@ class DeltaArm:
             m.setCurrent(20,100,100,100)
             m.setAccel(750)
             m.setMaxSpeed(750)
+            m.setLimitHardStop(0)
         self.positions = [-1,-1,-1]
         self.angles = [-1, -1, -1]
         self.zero_vals = [-2000, -2000, -2000]
