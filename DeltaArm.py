@@ -1,8 +1,22 @@
-import Slush
+#import Slush
 import math
 import time
 
 class DeltaArm:
+
+    #Static constants
+    #angles of each effector arm relative to coordinate axis
+    phi_vals = [math.radians(210), math.radians(90), math.radians(330)]
+    #feet
+    fixed_edge = .8828
+    effector_edge = .28867
+    upper_len = 1.438
+    lower_len = 2.90188
+    end_effector_z_offset = .083
+    #Position constants in steps
+    zero_vals = [-2000, -2000, -2000]
+    ninety_vals = [64000, 64000 ,64000]
+
     def __init__(self, c1, c2, c3):
         self.board = Slush.sBoard()
         self.motors = [Slush.Motor(c1),Slush.Motor(c2),Slush.Motor(c3)]
@@ -13,16 +27,6 @@ class DeltaArm:
             m.setLimitHardStop(0)
         self.positions = [-1,-1,-1]
         self.angles = [-1, -1, -1]
-        self.zero_vals = [-2000, -2000, -2000]
-        self.ninety_vals = [64000, 64000 ,64000]
-        #angles of each effector arm relative to coordinate axis
-        self.phi_vals = [math.radians(210), math.radians(90), math.radians(330)]
-        #feet
-        self.fixed_edge = .8828
-        self.effector_edge = .28867
-        self.upper_len = 1.438
-        self.lower_len = 2.90188
-        self.end_effector_z_offset = .083
 
     def home_all(self):
         for m in self.motors:
@@ -79,11 +83,13 @@ class DeltaArm:
     def get_angle(self, num):
         return self.angles[num]
 
-    def position_to_angle(self,num,pos):
-        return (pos - self.zero_vals[num])*90.0/(self.ninety_vals[num] - self.zero_vals[num])
+    @staticmethod
+    def position_to_angle(num,pos):
+        return (pos - DeltaArm.zero_vals[num])*90.0/( DeltaArm.ninety_vals[num] - DeltaArm.zero_vals[num])
     
+    @staticmethod
     def angle_to_position(self,num, ang):
-        return (ang)*(self.ninety_vals[num] - self.zero_vals[num])/90.0 + self.zero_vals[num]
+        return (ang)*(DeltaArm.ninety_vals[num] - DeltaArm.zero_vals[num])/90.0 + DeltaArm.zero_vals[num]
 
     @staticmethod
     def wrap_angle_rad(theta):
@@ -94,7 +100,8 @@ class DeltaArm:
                 theta -= 2*math.pi
         return theta
 
-    def rotate_point_to_yz_plane(self,x0,y0,z0,phi):
+    @staticmethod
+    def rotate_point_to_yz_plane(x0,y0,z0,phi):
         #do rotation matrix
         x = x0*math.cos(phi) + y0*math.sin(phi)
         y = -x0*math.sin(phi) + y0*math.cos(phi)
@@ -104,13 +111,14 @@ class DeltaArm:
         return (x,y,z)
 
 
-    def inverse_kinematics_in_yz_plane(self,x0,y0,z0):
+    @staticmethod
+    def inverse_kinematics_in_yz_plane(x0,y0,z0):
         # parameters
-        rf = self.upper_len
-        re = self.lower_len
-        f = self.fixed_edge
-        e = self.effector_edge
-        z0 = z0 + self.end_effector_z_offset
+        rf = DeltaArm.upper_len
+        re = DeltaArm.lower_len
+        f = DeltaArm.fixed_edge
+        e = DeltaArm.effector_edge
+        z0 = z0 + DeltaArm.end_effector_z_offset
 
         #linear coefficients of EQN z = b*y + a
 
@@ -130,53 +138,81 @@ class DeltaArm:
 
         theta = DeltaArm.wrap_angle_rad(math.atan(z/(y + f/(2*math.sqrt(3)))))
         return math.degrees(theta)
-        
-    def compute_triple_inverse_kinematics(self, x, y, z):
+
+    @staticmethod    
+    def compute_triple_inverse_kinematics(x, y, z):
         thetas = []
-        for phi in self.phi_vals:
-            (x0,y0,z0) = self.rotate_point_to_yz_plane(x,y,z,phi)
-            theta = self.inverse_kinematics_in_yz_plane(x0,y0,z0)
+        for phi in DeltaArm.phi_vals:
+            (x0,y0,z0) = DeltaArm.rotate_point_to_yz_plane(x,y,z,phi)
+            theta = DeltaArm.inverse_kinematics_in_yz_plane(x0,y0,z0)
             if theta == -1:
                 raise ValueError('that point is impossible!')
             thetas.append(theta)
         return (thetas[0], thetas[1], thetas[2])
 
     def move_to_point(self,x,y,z):
-        (a1,a2,a3) = self.compute_triple_inverse_kinematics(x,y,z)
+        (a1,a2,a3) = DeltaArm.compute_triple_inverse_kinematics(x,y,z)
         self.set_all_to_different_angle(a1,a2,a3)
 
-   def forward_kinematics(theta1, theta2, theta3):
-        rf = self.upper_len
-        re = self.lower_len
-        f = self.fixed_edge
-        e = self.effector_edge
-        z0 = z0 + self.end_effector_z_offset
+    @staticmethod
+    def forward_kinematics(theta1, theta2, theta3):
+        rf = DeltaArm.upper_len
+        re = DeltaArm.lower_len
+        f = DeltaArm.fixed_edge
+        e = DeltaArm.effector_edge
 
         #Finding J' points (centers of intersecting spheres)
         x1 = 0
         y1 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta1)
         z1 = -rf*math.sin(theta1)
-        (x1,y1,z1) = self.rotate_point_to_yz_plane(x1,y1,z1,phi_vals[0])
+        (x1,y1,z1) = DeltaArm.rotate_point_to_yz_plane(x1,y1,z1,DeltaArm.phi_vals[0])
         
         x2 = 0
         y2 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta2)
         z2 = -rf*math.sin(theta2)
-        (x2,y2,z2) = self.rotate_point_to_yz_plane(x2,y2,z2,phi_vals[1])
+        (x2,y2,z2) = DeltaArm.rotate_point_to_yz_plane(x2,y2,z2,DeltaArm.phi_vals[1])
 
         x3 = 0
         y3 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta3)
         z3 = -rf*math.sin(theta3)
-        (x3,y3,z3) = self.rotate_point_to_yz_plane(x3,y3,z3,phi_vals[2])
+        (x3,y3,z3) = DeltaArm.rotate_point_to_yz_plane(x3,y3,z3,DeltaArm.phi_vals[2])
 
         #Find intersection of 3 spheres
         w1 = x1**2 + y1**2 + z1**2
-        w2 = x2**2 + y2**2 + z2**2
-        
-        a1 = ((y1 - y3)*(z2 - z1) - (z2 - z1)*(y2 - y1))/((y1 - y3)*(x1 - x2))
-        b1 = 
+        w2 = x2**2 + y2**2 + z2**2 
+        w3 = x3**2 + y3**2 + z3**2
 
-        a2 = 
-        b2 = 
+        #Coefficients in EQN x = a1*z + b1
+        a1 = ((z1 - z3)*(y1 - y2) - (z1 - z2)*(y1 - y3)) / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2))
+        b1 = ((w1 - w2)*(y1 - y3) - (w1 - w3)*(y1 - y2)) / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2)) / 2
+ 
+        a2 = ((z1 - z3)*(x1 - x2) - (z1 - z2)*(x1 - x3)) / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2))
+        b2 = ((w1 - w2)*(x1 - x3) - (w1 - w3)*(x1 - x2)) / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2)) / 2
+
+        #Coefficients in Quadratic
+        A = 1 + a1**2 + a2**2
+        B = 2*a1*b1 + 2*a2*b2 - 2*a1*x1 - 2*a2*y1 - 2*z1
+        C = b1**2 + b2**2 - 2*b1*x1 - 2*b2*y1 - re**2 -x1**2 - y1**2 - z1**2
+
+        #Quadratic EQN
+        disc = B**2 - 4*A*C
+        #discriminate < 0 -> no solution
+        if disc < 0:
+            return (-1,-1,-1) 
+        z = (-B - math.sqrt(disc))/(2*A)
+
+        #Solve for x and y from z
+        x = a1*z + b1
+        y = a2*z + b2
+
+        #Fudge z for end effector height
+        z = z - DeltaArm.end_effector_z_offset
+        
+        #GG EZ
+        return (x,y,z)
+
+        
+        
 
 
 
