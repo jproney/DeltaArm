@@ -144,8 +144,39 @@ class DeltaArm:
     def move_to_point(self,x,y,z):
         (a1,a2,a3) = self.compute_triple_inverse_kinematics(x,y,z)
         self.set_all_to_different_angle(a1,a2,a3)
-        
 
+   def forward_kinematics(theta1, theta2, theta3):
+        rf = self.upper_len
+        re = self.lower_len
+        f = self.fixed_edge
+        e = self.effector_edge
+        z0 = z0 + self.end_effector_z_offset
+
+        #Finding J' points (centers of intersecting spheres)
+        x1 = 0
+        y1 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta1)
+        z1 = -rf*math.sin(theta1)
+        (x1,y1,z1) = self.rotate_point_to_yz_plane(x1,y1,z1,phi_vals[0])
+        
+        x2 = 0
+        y2 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta2)
+        z2 = -rf*math.sin(theta2)
+        (x2,y2,z2) = self.rotate_point_to_yz_plane(x2,y2,z2,phi_vals[1])
+
+        x3 = 0
+        y3 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta3)
+        z3 = -rf*math.sin(theta3)
+        (x3,y3,z3) = self.rotate_point_to_yz_plane(x3,y3,z3,phi_vals[2])
+
+        #Find intersection of 3 spheres
+        w1 = x1**2 + y1**2 + z1**2
+        w2 = x2**2 + y2**2 + z2**2
+        
+        a1 = ((y1 - y3)*(z2 - z1) - (z2 - z1)*(y2 - y1))/((y1 - y3)*(x1 - x2))
+        b1 = 
+
+        a2 = 
+        b2 = 
 
 
 
