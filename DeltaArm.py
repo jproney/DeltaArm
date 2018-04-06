@@ -163,18 +163,18 @@ class DeltaArm:
 
         #Finding J' points (centers of intersecting spheres)
         x1 = 0
-        y1 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta1)
-        z1 = -rf*math.sin(theta1)
+        y1 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(math.radians(theta1))
+        z1 = -rf*math.sin(math.radians(theta1))
         (x1,y1,z1) = DeltaArm.rotate_point_to_yz_plane(x1,y1,z1,DeltaArm.phi_vals[0])
         
         x2 = 0
-        y2 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta2)
-        z2 = -rf*math.sin(theta2)
+        y2 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(math.radians(theta2))
+        z2 = -rf*math.sin(math.radians(theta2))
         (x2,y2,z2) = DeltaArm.rotate_point_to_yz_plane(x2,y2,z2,DeltaArm.phi_vals[1])
 
         x3 = 0
-        y3 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(theta3)
-        z3 = -rf*math.sin(theta3)
+        y3 = (f-e)/(2*math.sqrt(3)) + rf*math.cos(math.radians(theta3))
+        z3 = -rf*math.sin(math.radians(theta3))
         (x3,y3,z3) = DeltaArm.rotate_point_to_yz_plane(x3,y3,z3,DeltaArm.phi_vals[2])
 
         #Find intersection of 3 spheres
@@ -193,8 +193,8 @@ class DeltaArm:
 
         #Coefficients in Quadratic
         A = dnm**2 + a1**2 + a2**2
-        B = 2*(a1*(b1 - x1*dnm) + a2*(b2 - y1*dnm) - z1*dnm*dnm)
-        C = (b1 - x1*dnm)**2 + (b2 - y1*dnm)**2 + dnm*dnm*(z1**2 - re**2)
+        B = 2*(a1*(b1 - x1*dnm) + a2*(b2 - y1*dnm) - z1*dnm**2)
+        C = (b1 - x1*dnm)**2 + (b2 - y1*dnm)**2 + (z1**2 - re**2)*dnm**2
 
         #Quadratic EQN
         disc = B**2 - 4*A*C
