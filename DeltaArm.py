@@ -213,11 +213,15 @@ class DeltaArm:
     def move_to_point_in_straight_line(self,x,y,z,dr):
         (a1,a2,a3) = [get_angle(i) for i in range(3)] 
         (x0,y0,z0) = DeltaArm.forward_kinematics(a1,a2,a3)
+        delta = (x,y,z) - (x0,y0,z0)
+        dGoal =  math.sqrt(x**2 + y**2 + z**2)
+
         (xCurr, yCurr, zCurr) = (x0,y0,z0)
         dCurr = 0
-        dGoal =  math.sqrt(x**2 + y**2 + z**2)
+
         while dCurr < dGoal:
-            
+            dCurr += dr
+            (xCurr,yCurr,zCurr) = (x0,y0,z0) + delta*dCurr/dr        
 
 
 
