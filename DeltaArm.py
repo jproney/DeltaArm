@@ -183,27 +183,29 @@ class DeltaArm:
         w3 = x3**2 + y3**2 + z3**2
 
         #Coefficients in EQN x = a1*z + b1
-        a1 = ((z1 - z3)*(y1 - y2) - (z1 - z2)*(y1 - y3)) / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2))
-        b1 = ((w1 - w2)*(y1 - y3) - (w1 - w3)*(y1 - y2)) / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2)) / 2
+        dnm = (x3 - x1)*(y2 - y1) - (x2 - x1)*(y3 - y1)
+        
+        a1 = ((z2 - z1)*(y3 - y1) - (z3 - z1)*(y2 - y1))
+        b1 = -((w2 - w1)*(y3 - y1) - (w3 - w1)*(y2 - y1)) / 2
  
-        a2 = ((z1 - z3)*(x1 - x2) - (z1 - z2)*(x1 - x3)) / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2))
-        b2 = ((w1 - w2)*(x1 - x3) - (w1 - w3)*(x1 - x2)) / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2)) / 2
+        a2 = -((z2 - z1)*(x3 - x1) - (z3 - z1)*(x2 - x1))
+        b2 = ((w1 - w2)*(x1 - x3) - (w1 - w3)*(x1 - x2)) / 2
 
         #Coefficients in Quadratic
-        A = 1 + a1**2 + a2**2
-        B = 2*a1*b1 + 2*a2*b2 - 2*a1*x1 - 2*a2*y1 - 2*z1
-        C = b1**2 + b2**2 - 2*b1*x1 - 2*b2*y1 - re**2 -x1**2 - y1**2 - z1**2
+        A = dnm**2 + a1**2 + a2**2
+        B = 2*(a1*(b1 - x1*dnm) + a2*(b2 - y1*dnm) - z1*dnm*dnm)
+        C = (b1 - x1*dnm)**2 + (b2 - y1*dnm)**2 + dnm*dnm*(z1**2 - re**2)
 
         #Quadratic EQN
         disc = B**2 - 4*A*C
-        #discriminate < 0 -> no solution
+        #discriminant < 0 -> no solution
         if disc < 0:
             return (-1,-1,-1) 
         z = (-B - math.sqrt(disc))/(2*A)
 
         #Solve for x and y from z
-        x = a1*z + b1
-        y = a2*z + b2
+        x = (a1*z + b1) / dnm
+        y = (a2*z + b2) / dnm
 
         #Fudge z for end effector height
         z = z - DeltaArm.end_effector_z_offset
