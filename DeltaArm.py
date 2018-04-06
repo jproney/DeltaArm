@@ -25,8 +25,6 @@ class DeltaArm:
             m.setAccel(750)
             m.setMaxSpeed(750)
             m.setLimitHardStop(0)
-        self.positions = [-1,-1,-1]
-        self.angles = [-1, -1, -1]
 
     def home_all(self):
         for m in self.motors:
@@ -77,11 +75,10 @@ class DeltaArm:
         self.motors[2].setAsHome()
 
     def get_position(self,num):
-        self.angles[num] = self.position_to_angle(self.positions[num])    
-        return self.positions[num]
-
+        return self.motors[num].getPosition()
+    
     def get_angle(self, num):
-        return self.angles[num]
+        return DeltaArm.position_to_angle(get_position())
 
     @staticmethod
     def position_to_angle(num,pos):
@@ -153,7 +150,7 @@ class DeltaArm:
     def move_to_point(self,x,y,z):
         (a1,a2,a3) = DeltaArm.compute_triple_inverse_kinematics(x,y,z)
         self.set_all_to_different_angle(a1,a2,a3)
-
+    
     @staticmethod
     def forward_kinematics(theta1, theta2, theta3):
         rf = DeltaArm.upper_len
@@ -200,7 +197,7 @@ class DeltaArm:
         disc = B**2 - 4*A*C
         #discriminant < 0 -> no solution
         if disc < 0:
-            return (-1,-1,-1) 
+            return (-99,-99,-99) 
         z = (-B - math.sqrt(disc))/(2*A)
 
         #Solve for x and y from z
@@ -213,8 +210,14 @@ class DeltaArm:
         #GG EZ
         return (x,y,z)
 
-        
-        
+    def move_to_point_in_straight_line(self,x,y,z,dr):
+        (a1,a2,a3) = [get_angle(i) for i in range(3)] 
+        (x0,y0,z0) = DeltaArm.forward_kinematics(a1,a2,a3)
+        (xCurr, yCurr, zCurr) = (x0,y0,z0)
+        dCurr = 0
+        dGoal =  math.sqrt(x**2 + y**2 + z**2)
+        while dCurr < dGoal:
+            
 
 
 
