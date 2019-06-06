@@ -3,7 +3,7 @@ Delta Arm prototype for the DPEA. Contains inverse kinematics for guiding effect
 
 ## Introduction to Delta Robots
 
-A Delta Robot has a series of motors mounted at fixed points, which attach to series of joints convering on an end effector. 
+A Delta Robot has a series of motors mounted at fixed points, which attach to series of joints convening on an end effector. 
 
 ![Image of Delta Robot](https://banner2.kisspng.com/20180424/jpe/kisspng-delta-robot-parallel-manipulator-robotics-photo-printer-5adf2d5339c8b3.7737819615245755712367.jpg)
 
